@@ -43,8 +43,6 @@ const server = http.createServer((req, res) => {
             });
 
         }
-        
-
 
     } else {
         if(accessToken != '' && refreshToken != ''){
@@ -59,7 +57,7 @@ const server = http.createServer((req, res) => {
                 }
                 zohoCRMService.addContact(formData, function (error, contactRes) {
                     if (error) {
-                        console.error('Error getting access token:', error);
+                        console.error('Getting error: ', error);
                     } else {
                         res.end(contactRes.message);
                     }
