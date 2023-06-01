@@ -22,7 +22,7 @@
 3. import service.zohocrm.js e.g. <code>const zohoCRMService = require('./service.zohocrm');</code>
 4. Use this code, where you have data and you want to create a contact in nodejs
 <code>
-  zohoCRMService.addContact(<email>, <lastname>, function (error, contactRes) {
+  zohoCRMService.addContact(email, lastname, function (error, contactRes) {
     if (error) {
       console.error('Error getting access token:', error);
      } else {
