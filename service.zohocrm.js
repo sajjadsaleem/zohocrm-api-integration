@@ -58,7 +58,7 @@ function getAccessToken(code, callback) {
 }
 
 // GET REFRESH TOKEN
-function getRefreshToken(callback) {
+function getAccessTokenRefreshToken(callback) {
     var data = {
       refresh_token: refreshToken,
       client_id: clientId,
@@ -96,49 +96,66 @@ function getRefreshToken(callback) {
 }
 
 // ADD CONTACT
-function addContact(token,formData, callback) {
-    var options = {
-      'method': 'POST',
-      'url': 'https://www.zohoapis.com/crm/v4/Contacts',
-      'headers': {
-        'Authorization': 'Zoho-oauthtoken '+token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        "data": [
-          formData
-        ]
-      })
-    };
-  
-    request(options, function (error, response, body) {
-      if (error) {
-        console.error('Error:', error);
-        if (typeof callback === 'function') {
-          return callback(error); // Pass the error to the callback if it's a function
-        }
-      }
+function addContact(formData, callback) {
+  getAccessTokenRefreshToken(function (tokenError, token) {
+    if (tokenError) {
 
-      const resData = JSON.parse(body)
-      console.log('addContact resData=',resData.data[0].message)
-      
+      console.error('Error getting access token:', tokenError);
       var data = {
-        'status': true,
-        'message': resData.data[0].message+' '+formData.Email,
-        'body': resData
+        'status': false,
+        'message': tokenError,
+        'body': ''
       };
-
+    
       if (typeof callback === 'function') {
         return callback(null, data);
       }
 
-    });
+    } else {
+        var options = {
+          'method': 'POST',
+          'url': 'https://www.zohoapis.com/crm/v4/Contacts',
+          'headers': {
+            'Authorization': 'Zoho-oauthtoken '+token.body.access_token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            "data": [
+              formData
+            ]
+          })
+        };
+        request(options, function (error, response, body) {
+          if (error) {
+            console.error('Error:', error);
+            if (typeof callback === 'function') {
+              return callback(error); // Pass the error to the callback if it's a function
+            }
+          }
+    
+          const resData = JSON.parse(body)
+          // console.log('addContact resData=',resData.data[0].message)
+          
+          var data = {
+            'status': true,
+            'message': resData.data[0].message+' '+formData.Email,
+            'body': resData
+          };
+    
+          if (typeof callback === 'function') {
+            return callback(null, data);
+          }
+    
+        });
+      }
+    })
+  
 }
   
 // Export the functions to make them accessible from other files
 module.exports = {
     getCRMURL,
     getAccessToken,
-    getRefreshToken,
+    getAccessTokenRefreshToken,
     addContact
 };

@@ -51,28 +51,45 @@ const server = http.createServer((req, res) => {
             const queryParameters = querystring.parse(parsedUrl.query);
 
             if (queryParameters.email) {
-                zohoCRMService.getRefreshToken(function (error, token) {
+                const formData = {
+                    Email: queryParameters.email,
+                    Last_Name: queryParameters.last_name,
+                }
+                // console.log('req=',formData)
+                zohoCRMService.addContact(formData, function (error, contactRes) {
                     if (error) {
                         console.error('Error getting access token:', error);
                     } else {
-                        // console.log('ZOHO_ACCESS_TOKEN=', accessToken+' & ZOHO_REFRESH_TOKEN='+refreshToken+' available');
-                        const formData = {
-                            Email: queryParameters.email,
-                            Last_Name: queryParameters.last_name,
-                        }
-                        // console.log('req=',formData)
-                        zohoCRMService.addContact(token.body.access_token,formData, function (error, contactRes) {
-                            if (error) {
-                                console.error('Error getting access token:', error);
-                            } else {
-                                res.end(contactRes.message);
-                            }
-                        });
+                        res.end(contactRes.message);
                     }
                 });
             } else {
                 res.end('email and last_name field is required');
             }
+
+            // if (queryParameters.email) {
+            //     zohoCRMService.getAccessTokenRefreshToken(function (error, token) {
+            //         if (error) {
+            //             console.error('Error getting access token:', error);
+            //         } else {
+            //             // console.log('ZOHO_ACCESS_TOKEN=', accessToken+' & ZOHO_REFRESH_TOKEN='+refreshToken+' available');
+            //             const formData = {
+            //                 Email: queryParameters.email,
+            //                 Last_Name: queryParameters.last_name,
+            //             }
+            //             // console.log('req=',formData)
+            //             zohoCRMService.addContact(token.body.access_token,formData, function (error, contactRes) {
+            //                 if (error) {
+            //                     console.error('Error getting access token:', error);
+            //                 } else {
+            //                     res.end(contactRes.message);
+            //                 }
+            //             });
+            //         }
+            //     });
+            // } else {
+            //     res.end('email and last_name field is required');
+            // }
 
         } else {
             res.statusCode = 302;
