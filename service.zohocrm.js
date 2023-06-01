@@ -55,7 +55,7 @@ function getAccessToken(code, callback) {
         var token = {
           'status': true,
           'message': 'success',
-          'url': body
+          'body': JSON.parse(body)
         };
   
         if (typeof callback === 'function') {

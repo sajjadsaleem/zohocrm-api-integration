@@ -24,11 +24,11 @@ const server = http.createServer((req, res) => {
             if (error) {
                 console.error('Error getting access token:', error);
             } else {
-                console.log('getToken:', token);
+                // console.log('getToken:', token.body.access_token);
+                res.end('code'+token.body.access_token);
             }
         });
 
-        res.end('code'+code);
 
     } else {
         res.statusCode = 302;
