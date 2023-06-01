@@ -96,7 +96,7 @@ function getAccessTokenRefreshToken(callback) {
 }
 
 // ADD CONTACT
-function addContact(formData, callback) {
+function addContact(Email,Last_Name, callback) {
   getAccessTokenRefreshToken(function (tokenError, token) {
     if (tokenError) {
 
@@ -120,9 +120,10 @@ function addContact(formData, callback) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            "data": [
-              formData
-            ]
+            "data": [{
+              Email: Email,
+              Last_Name: Last_Name
+            }]
           })
         };
         request(options, function (error, response, body) {
@@ -138,8 +139,10 @@ function addContact(formData, callback) {
           
           var data = {
             'status': true,
-            'message': resData.data[0].message+' '+formData.Email,
-            'body': resData
+            'message': resData.data[0].message+' '+Email,
+            'body': resData,
+            'Email': Email,
+            'Last_Name': Last_Name,
           };
     
           if (typeof callback === 'function') {

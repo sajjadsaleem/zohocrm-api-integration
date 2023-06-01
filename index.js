@@ -9,6 +9,7 @@ const zohoCRMService = require('./service.zohocrm');
 
 const port = process.env.PORT;
 const hostname = process.env.HOSTNAME;
+const baseUrl = process.env.BASE_URL;
 const clientId = process.env.ZOHO_CLIENT_ID;
 const clientSecret = process.env.ZOHO_CLIENT_SECRET;
 const accessToken = process.env.ZOHO_ACCESS_TOKEN;
@@ -50,20 +51,33 @@ const server = http.createServer((req, res) => {
             const parsedUrl = url.parse(req.url);
             const queryParameters = querystring.parse(parsedUrl.query);
 
-            if (queryParameters.email) {
-                const formData = {
-                    Email: queryParameters.email,
-                    Last_Name: queryParameters.last_name,
-                }
-                zohoCRMService.addContact(formData, function (error, contactRes) {
+            if (queryParameters.Email && queryParameters.Last_Name) {
+                zohoCRMService.addContact(queryParameters.Email,queryParameters.Last_Name, function (error, contactRes) {
                     if (error) {
                         console.error('Getting error: ', error);
                     } else {
-                        res.end(contactRes.message);
+                        res.end('<html>'+
+                        '<h4>'+contactRes.message+'</h4>'+
+                        '<form action="'+baseUrl+'" method="get">'+
+                            'Email: <input type="email" name="Email" value="'+contactRes.Email+'" />'+
+                            ' Last Name: <input type="text" name="Last_Name" value="'+contactRes.Last_Name+'" />'+
+                            ' <button type="submit">Submit</button>'+
+                        '</form>'+
+                    '</html>')
                     }
                 });
             } else {
-                res.end('email and last_name field is required');
+                var errorMsg = ''
+                if(queryParameters.Email == '' && queryParameters.Last_Name == ''){
+                    errorMsg = '<h4>Both fields are required</h4>'
+                }
+                res.end('<html>'+errorMsg+
+                    '<form action="'+baseUrl+'" method="get">'+
+                        'Email: <input type="email" name="Email" />'+
+                        ' Last Name: <input type="text" name="Last_Name" />'+
+                        ' <button type="submit">Submit</button>'+
+                    '</form>'+
+                '</html>');
             }
 
         } else {
