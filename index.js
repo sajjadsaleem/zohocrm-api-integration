@@ -9,6 +9,8 @@ const zohoCRMService = require('./service.zohocrm');
 
 const port = process.env.PORT;
 const hostname = process.env.HOSTNAME;
+const clientId = process.env.ZOHO_CLIENT_ID;
+const clientSecret = process.env.ZOHO_CLIENT_SECRET;
 const accessToken = process.env.ZOHO_ACCESS_TOKEN;
 const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
 
@@ -36,7 +38,7 @@ const server = http.createServer((req, res) => {
                     console.error('Error getting access token:', error);
                 } else {
                     // console.log('getToken:', token.body.access_token);
-                    res.end('Kindly update this ZOHO_ACCESS_TOKEN='+token.body.access_token+' and ZOHO_REFRESH_TOKEN='+token.body.refresh_token+' in your .env file.');
+                    res.end('Kindly update ZOHO_ACCESS_TOKEN='+token.body.access_token+' and ZOHO_REFRESH_TOKEN='+token.body.refresh_token+' in your .env file.');
                 }
             });
 
@@ -55,7 +57,6 @@ const server = http.createServer((req, res) => {
                     Email: queryParameters.email,
                     Last_Name: queryParameters.last_name,
                 }
-                // console.log('req=',formData)
                 zohoCRMService.addContact(formData, function (error, contactRes) {
                     if (error) {
                         console.error('Error getting access token:', error);
@@ -67,35 +68,15 @@ const server = http.createServer((req, res) => {
                 res.end('email and last_name field is required');
             }
 
-            // if (queryParameters.email) {
-            //     zohoCRMService.getAccessTokenRefreshToken(function (error, token) {
-            //         if (error) {
-            //             console.error('Error getting access token:', error);
-            //         } else {
-            //             // console.log('ZOHO_ACCESS_TOKEN=', accessToken+' & ZOHO_REFRESH_TOKEN='+refreshToken+' available');
-            //             const formData = {
-            //                 Email: queryParameters.email,
-            //                 Last_Name: queryParameters.last_name,
-            //             }
-            //             // console.log('req=',formData)
-            //             zohoCRMService.addContact(token.body.access_token,formData, function (error, contactRes) {
-            //                 if (error) {
-            //                     console.error('Error getting access token:', error);
-            //                 } else {
-            //                     res.end(contactRes.message);
-            //                 }
-            //             });
-            //         }
-            //     });
-            // } else {
-            //     res.end('email and last_name field is required');
-            // }
-
         } else {
-            res.statusCode = 302;
-            res.setHeader('Content-Type', 'text/plain');
-            res.setHeader('Location', zohoCRMService.getCRMURL()); // Set the URL to redirect to
-            res.end();
+            if(clientId != '' && clientSecret != ''){
+                res.statusCode = 302;
+                res.setHeader('Content-Type', 'text/plain');
+                res.setHeader('Location', zohoCRMService.getCRMURL()); // Set the URL to redirect to
+                res.end();
+            } else {
+                res.end('Kindly update ZOHO_CLIENT_ID="" and ZOHO_CLIENT_SECRET="" in your .env file.');
+            }
         }
     }
 
