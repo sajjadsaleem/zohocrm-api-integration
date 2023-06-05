@@ -15,7 +15,7 @@ function getCRMURL() {
     const clientId = process.env.ZOHO_CLIENT_ID;
 
     // ZOHO CRM URL
-    const zohoUrl = "https://accounts.zoho.com/oauth/v2/auth?scope=ZohoCRM.modules.ALL,ZohoCRM.settings.ALL&client_id="+clientId+"&response_type=code&access_type=offline&redirect_uri="+baseURL
+    const zohoUrl = process.env.ZOHO_API_AUTH+"?scope=ZohoCRM.modules.ALL,ZohoCRM.settings.ALL&client_id="+clientId+"&response_type=code&access_type=offline&redirect_uri="+baseURL
 
     return zohoUrl
 }
@@ -32,7 +32,7 @@ function getAccessToken(code, callback) {
   
     var options = {
       'method': 'POST',
-      'url': 'https://accounts.zoho.com/oauth/v2/token',
+      'url': process.env.ZOHO_API_TOKEN,
       formData: data
     };
   
@@ -68,7 +68,7 @@ function getAccessTokenRefreshToken(callback) {
   
     var options = {
       'method': 'POST',
-      'url': 'https://accounts.zoho.com/oauth/v2/token',
+      'url': process.env.ZOHO_API_TOKEN,
       formData: data
     };
   
@@ -80,11 +80,22 @@ function getAccessTokenRefreshToken(callback) {
         }
       }
 
-      console.log('JSON.parse(body)=',JSON.parse(body))
+      var bodyData = JSON.parse(body)
+      var status = true
+      var msg = 'success'
+
+      if(Object.keys(bodyData).length > 0){
+        if('error' in bodyData){
+          status = false
+          msg = bodyData.error
+        }
+      } 
+
+      console.log('JSON.parse(body)=',bodyData)
       
       var token = {
-        'status': true,
-        'message': 'success',
+        'status': status,
+        'message': msg,
         'body': JSON.parse(body)
       };
 
@@ -98,12 +109,12 @@ function getAccessTokenRefreshToken(callback) {
 // ADD CONTACT
 function addContact(Email,Last_Name, callback) {
   getAccessTokenRefreshToken(function (tokenError, token) {
-    if (tokenError) {
+    // console.error('Error getting access token:', tokenError, token.status);
+    if (!token.status) {
 
-      console.error('Error getting access token:', tokenError);
       var data = {
         'status': false,
-        'message': tokenError,
+        'message': token.message,
         'body': ''
       };
     
@@ -114,7 +125,7 @@ function addContact(Email,Last_Name, callback) {
     } else {
         var options = {
           'method': 'POST',
-          'url': 'https://www.zohoapis.com/crm/v4/Contacts',
+          'url': process.env.ZOHO_API_CONTACTS,
           'headers': {
             'Authorization': 'Zoho-oauthtoken '+token.body.access_token,
             'Content-Type': 'application/json',
@@ -135,7 +146,7 @@ function addContact(Email,Last_Name, callback) {
           }
     
           const resData = JSON.parse(body)
-          // console.log('addContact resData=',resData.data[0].message)
+          console.log('addContact resData=',resData)
           
           var data = {
             'status': true,
